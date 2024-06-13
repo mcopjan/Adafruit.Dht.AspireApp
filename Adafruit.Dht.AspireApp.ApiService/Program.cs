@@ -29,7 +29,7 @@ app.MapGet("/weatherforecast", () =>
     return forecast;
 });
 
-app.MapPost("/weatherforecast", async (HttpRequest request) =>
+app.MapPost("/sensor/readings", async (HttpRequest request) =>
 {
     // Read the request body
     using var reader = new StreamReader(request.Body);

@@ -6,7 +6,7 @@ var builder = Host.CreateApplicationBuilder(args);
 builder.AddServiceDefaults();
 
 
-builder.Services.AddHttpClient<DhtMetricsApiClient>(client =>
+builder.Services.AddHttpClient<ApiServiceHttpClient>(client =>
 {
     // This URL uses "https+http://" to indicate HTTPS is preferred over HTTP.
     // Learn more about service discovery scheme resolution at https://aka.ms/dotnet/sdschemes.

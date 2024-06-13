@@ -5,18 +5,21 @@ namespace Adafruit.Dht.AspireApp.SensorDataCollector;
 public class Worker : BackgroundService
 {
     private readonly ILogger<Worker> _logger;
-    private readonly DhtMetricsApiClient serviceApiHttpClient;
-    private static readonly HttpClient _client = new HttpClient() { BaseAddress = new Uri("http://192.168.5.208:5000/") };
+    private readonly ApiServiceHttpClient _apiServiceHttpClient;
+    private static readonly HttpClient _sensorHttpClient = new HttpClient() { BaseAddress = new Uri("http://192.168.5.208:5000/") };
+    private List<DhtReading> readings = new List<DhtReading>();
+    private readonly Timer _timer;
 
-    public Worker(DhtMetricsApiClient httpClient, ILogger<Worker> logger)
+    public Worker(ApiServiceHttpClient httpClient, ILogger<Worker> logger)
     {
         _logger = logger;
-        serviceApiHttpClient = httpClient;
+        _apiServiceHttpClient = httpClient;
+        _timer = new Timer(OnTimedEvent, _apiServiceHttpClient, 0, 60000);
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        DhtReading readings = new DhtReading();
+        
         while (!stoppingToken.IsCancellationRequested)
         {
             if (_logger.IsEnabled(LogLevel.Information))
@@ -26,18 +29,30 @@ public class Worker : BackgroundService
 
             try
             {
-                var response = await _client.GetStringAsync("sensor");
-                readings = JsonSerializer.Deserialize<DhtReading>(response);
+                var response = await _sensorHttpClient.GetStringAsync("sensor");
+                var reading = JsonSerializer.Deserialize<DhtReading>(response);
+                readings.Add(reading);
+                _logger.LogInformation($"DHT sensor readings captured: {reading.Temperature}C, {reading.Humidity}%");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message, ex);
-                readings.Humidity = 0;
-                readings.Temperature = 0;
             }
 
-            await serviceApiHttpClient.PostWeatherAsync(readings);
             await Task.Delay(10000, stoppingToken);
+        }
+    }
+
+    private async void OnTimedEvent(Object state)
+    {
+        if (!readings.Any())
+        {
+            _logger.LogWarning("No sensor data to send.");
+        }
+        else
+        {
+            await ((ApiServiceHttpClient)state).PostWeatherAsync(readings);
+            readings.Clear();
         }
     }
 }

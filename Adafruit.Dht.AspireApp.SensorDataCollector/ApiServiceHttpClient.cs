@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace Adafruit.Dht.AspireApp.SensorDataCollector
 {
-    public class DhtMetricsApiClient
+    public class ApiServiceHttpClient
     {
         private readonly HttpClient _client;
-        public DhtMetricsApiClient(HttpClient client)
+        public ApiServiceHttpClient(HttpClient client)
         {
             _client = client;
         }
@@ -19,7 +15,7 @@ namespace Adafruit.Dht.AspireApp.SensorDataCollector
         {
             List<WeatherForecast>? forecasts = null;
 
-            await foreach (var forecast in _client.GetFromJsonAsAsyncEnumerable<WeatherForecast>("/weatherforecast", cancellationToken))
+            await foreach (var forecast in _client.GetFromJsonAsAsyncEnumerable<WeatherForecast>("/readings", cancellationToken))
             {
                 if (forecasts?.Count >= maxItems)
                 {
@@ -42,7 +38,7 @@ namespace Adafruit.Dht.AspireApp.SensorDataCollector
             var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
 
             // Send the POST request
-            var response = await _client.PostAsync("/weatherforecast", content, cancellationToken);
+            var response = await _client.PostAsync("/sensor/readings", content, cancellationToken);
 
             // Optionally, handle the response
             if (!response.IsSuccessStatusCode)

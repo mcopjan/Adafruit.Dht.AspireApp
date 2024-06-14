@@ -1,4 +1,4 @@
-﻿using System.Net.Http.Json;
+﻿using Adafruit.Dht.AspireApp.Models;
 using System.Text;
 using System.Text.Json;
 
@@ -11,30 +11,11 @@ namespace Adafruit.Dht.AspireApp.SensorDataCollector
         {
             _client = client;
         }
-        public async Task<WeatherForecast[]> GetWeatherAsync(int maxItems = 10, CancellationToken cancellationToken = default)
-        {
-            List<WeatherForecast>? forecasts = null;
 
-            await foreach (var forecast in _client.GetFromJsonAsAsyncEnumerable<WeatherForecast>("/readings", cancellationToken))
-            {
-                if (forecasts?.Count >= maxItems)
-                {
-                    break;
-                }
-                if (forecast is not null)
-                {
-                    forecasts ??= [];
-                    forecasts.Add(forecast);
-                }
-            }
-
-            return forecasts?.ToArray() ?? [];
-        }
-
-        public async Task PostWeatherAsync(object data, int maxItems = 10, CancellationToken cancellationToken = default)
+        public async Task PostSensorReadingsAsync(List<DhtReading> readings, int maxItems = 10, CancellationToken cancellationToken = default)
         {
             // Serialize the data object to JSON
-            var jsonData = JsonSerializer.Serialize(data);
+            var jsonData = JsonSerializer.Serialize(readings);
             var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
 
             // Send the POST request
@@ -48,11 +29,5 @@ namespace Adafruit.Dht.AspireApp.SensorDataCollector
             }
         }
     }
-
-
-
-    public record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-    {
-        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-    }
 }
+

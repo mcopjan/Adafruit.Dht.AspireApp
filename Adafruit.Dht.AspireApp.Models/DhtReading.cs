@@ -1,7 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 
 
-namespace Adafruit.Dht.AspireApp.SensorDataCollector
+namespace Adafruit.Dht.AspireApp.Models
 {
     public class DhtReading
     {
@@ -9,5 +9,7 @@ namespace Adafruit.Dht.AspireApp.SensorDataCollector
         public decimal Humidity { get; set; }
         [JsonPropertyName("temperature")]
         public decimal Temperature { get; set; }
+        [JsonPropertyName("created_local")]
+        public DateTime? CreatedLocal { get; set; }
     }
 }

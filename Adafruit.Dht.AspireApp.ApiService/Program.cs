@@ -1,58 +1,45 @@
-var builder = WebApplication.CreateBuilder(args);
+using Adafruit.Dht.AspireApp.Models;
+using System.Collections.Concurrent;
+using System.Text.Json;
 
-// Add service defaults & Aspire components.
-builder.AddServiceDefaults();
-
-// Add services to the container.
-builder.Services.AddProblemDetails();
-
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-app.UseExceptionHandler();
-
-var summaries = new[]
+internal class Program
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+    private static ConcurrentBag<DhtReading> SensorReadings = new ConcurrentBag<DhtReading>(); 
+    private static void Main(string[] args)
+    {
+        var builder = WebApplication.CreateBuilder(args);
 
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-});
+        // Add service defaults & Aspire components.
+        builder.AddServiceDefaults();
 
-app.MapPost("/sensor/readings", async (HttpRequest request) =>
-{
-    // Read the request body
-    using var reader = new StreamReader(request.Body);
-    var body = await reader.ReadToEndAsync();
+        // Add services to the container.
+        builder.Services.AddProblemDetails();
 
-    // Log the data to the console
-    Console.WriteLine(body);
+        var app = builder.Build();
 
-    // Optionally, deserialize the body to a specific type
-    //var weatherData = JsonSerializer.Deserialize<WeatherForecast>(body);
-    //if (weatherData != null)
-    //{
-    //    Console.WriteLine($"Temperature: {weatherData.TemperatureC}, Summary: {weatherData.Summary}");
-    //}
+        // Configure the HTTP request pipeline.
+        app.UseExceptionHandler();
 
-    return Results.Ok();
-});
 
-app.MapDefaultEndpoints();
 
-app.Run();
+        app.MapGet("/sensor/readings", () =>
+        {
+            return SensorReadings;
+        });
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+        app.MapPost("/sensor/readings", async (HttpRequest request) =>
+        {
+            // Read the request body
+            using var reader = new StreamReader(request.Body);
+            var body = await reader.ReadToEndAsync();
+            var readings = JsonSerializer.Deserialize<List<DhtReading>>(body);
+            readings?.ForEach(x => SensorReadings.Add(x));
+            Console.WriteLine(body);
+            return Results.Ok();
+        });
+
+        app.MapDefaultEndpoints();
+
+        app.Run();
+    }
 }

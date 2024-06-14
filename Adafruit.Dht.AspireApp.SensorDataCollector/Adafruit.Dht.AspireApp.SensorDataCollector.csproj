@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Worker">
+﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Adafruit.Dht.AspireApp.Models\Adafruit.Dht.AspireApp.Models.csproj" />
     <ProjectReference Include="..\Adafruit.Dht.AspireApp.ServiceDefaults\Adafruit.Dht.AspireApp.ServiceDefaults.csproj" />
   </ItemGroup>
 </Project>

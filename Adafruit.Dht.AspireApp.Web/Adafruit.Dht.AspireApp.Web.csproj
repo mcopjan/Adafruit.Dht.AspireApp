@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Adafruit.Dht.AspireApp.Models\Adafruit.Dht.AspireApp.Models.csproj" />
     <ProjectReference Include="..\Adafruit.Dht.AspireApp.ServiceDefaults\Adafruit.Dht.AspireApp.ServiceDefaults.csproj" />
   </ItemGroup>
 

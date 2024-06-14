@@ -1,3 +1,4 @@
+using Adafruit.Dht.AspireApp.Models;
 using System.Text.Json;
 
 namespace Adafruit.Dht.AspireApp.SensorDataCollector;
@@ -31,6 +32,7 @@ public class Worker : BackgroundService
             {
                 var response = await _sensorHttpClient.GetStringAsync("sensor");
                 var reading = JsonSerializer.Deserialize<DhtReading>(response);
+                reading.CreatedLocal = DateTime.Now;
                 readings.Add(reading);
                 _logger.LogInformation($"DHT sensor readings captured: {reading.Temperature}C, {reading.Humidity}%");
             }
@@ -51,7 +53,7 @@ public class Worker : BackgroundService
         }
         else
         {
-            await ((ApiServiceHttpClient)state).PostWeatherAsync(readings);
+            await ((ApiServiceHttpClient)state).PostSensorReadingsAsync(readings);
             readings.Clear();
         }
     }

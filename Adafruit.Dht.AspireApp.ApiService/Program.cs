@@ -22,6 +22,10 @@ internal class Program
         // Add services to the container.
         builder.Services.AddProblemDetails();
 
+        // Configure logging
+        builder.Logging.ClearProviders();
+        builder.Logging.AddConsole();
+
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
@@ -29,7 +33,7 @@ internal class Program
 
 
 
-        app.MapGet("/sensor/readings", async (DhtReadingContext context) =>
+        app.MapGet("/sensor/readings", async (DhtReadingContext context, ILogger<Program> logger) =>
         {
             try
             {
@@ -38,8 +42,7 @@ internal class Program
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
-                //logger.LogError(ex.Message, ex);
+                logger.LogError(ex.Message, ex);
             }
             return null;
             
@@ -47,7 +50,7 @@ internal class Program
 
 
 
-        app.MapPost("/sensor/readings", async (HttpRequest request, DhtReadingContext context) =>
+        app.MapPost("/sensor/readings", async (HttpRequest request, DhtReadingContext context, ILogger<Program> logger) =>
         {
             using var reader = new StreamReader(request.Body);
             var body = await reader.ReadToEndAsync();
@@ -69,8 +72,7 @@ internal class Program
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.Message);
-                    //logger.LogError(ex.Message, ex);
+                    logger.LogError(ex.Message, ex);
                 }
             }
             return Results.Ok();

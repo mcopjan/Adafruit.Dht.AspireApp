@@ -25,6 +25,7 @@ internal class Program
         // Configure logging
         builder.Logging.ClearProviders();
         builder.Logging.AddConsole();
+        builder.Logging.SetMinimumLevel(LogLevel.Information);
 
         var app = builder.Build();
 

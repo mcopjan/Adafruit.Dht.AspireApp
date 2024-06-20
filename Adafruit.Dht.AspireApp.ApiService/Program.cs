@@ -31,8 +31,18 @@ internal class Program
 
         app.MapGet("/sensor/readings", async (DhtReadingContext context) =>
         {
-            var entries = await context.SensorReadings.ToListAsync();
-            return entries;
+            try
+            {
+                var entries = await context.SensorReadings.ToListAsync();
+                return entries;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                //logger.LogError(ex.Message, ex);
+            }
+            return null;
+            
         });
 
 
@@ -59,8 +69,8 @@ internal class Program
                 }
                 catch (Exception ex)
                 {
-
                     Console.WriteLine(ex.Message);
+                    //logger.LogError(ex.Message, ex);
                 }
             }
             return Results.Ok();

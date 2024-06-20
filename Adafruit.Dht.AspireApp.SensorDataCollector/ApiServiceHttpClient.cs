@@ -7,9 +7,12 @@ namespace Adafruit.Dht.AspireApp.SensorDataCollector
     public class ApiServiceHttpClient
     {
         private readonly HttpClient _client;
-        public ApiServiceHttpClient(HttpClient client)
+        private readonly ILogger<ApiServiceHttpClient> _logger;
+
+        public ApiServiceHttpClient(HttpClient client, ILogger<ApiServiceHttpClient> logger)
         {
             _client = client;
+            _logger = logger;
         }
 
         public async Task PostSensorReadingsAsync(List<DhtReading> readings, int maxItems = 10, CancellationToken cancellationToken = default)
@@ -25,7 +28,8 @@ namespace Adafruit.Dht.AspireApp.SensorDataCollector
             if (!response.IsSuccessStatusCode)
             {
                 var responseBody = await response.Content.ReadAsStringAsync();
-                throw new HttpRequestException($"Request failed with status code {response.StatusCode}: {responseBody}");
+
+                _logger.LogError($"An error occurred while sending data from worker service data collector to API service {response.StatusCode} {responseBody}");
             }
         }
     }

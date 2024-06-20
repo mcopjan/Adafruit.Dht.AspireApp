@@ -1,8 +1,17 @@
+using Aspire.Hosting;
+
 var builder = DistributedApplication.CreateBuilder(args);
 
 var cache = builder.AddRedis("cache");
 
-var apiService = builder.AddProject<Projects.Adafruit_Dht_AspireApp_ApiService>("apiservice");
+var db1 = builder.AddPostgres("sql1").WithPgAdmin().AddDatabase("postgres");
+
+
+
+
+var apiService =
+    builder.AddProject<Projects.Adafruit_Dht_AspireApp_ApiService>("apiservice")
+    .WithReference(db1);
 
 builder.AddProject<Projects.Adafruit_Dht_AspireApp_Web>("webfrontend")
     .WithExternalHttpEndpoints()

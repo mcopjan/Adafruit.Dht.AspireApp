@@ -15,7 +15,7 @@ public class Worker : BackgroundService
     {
         _logger = logger;
         _apiServiceHttpClient = httpClient;
-        _timer = new Timer(OnTimedEvent, _apiServiceHttpClient, 0, 60000);
+        _timer = new Timer(OnTimedEvent, _apiServiceHttpClient, 0, 30000);
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)

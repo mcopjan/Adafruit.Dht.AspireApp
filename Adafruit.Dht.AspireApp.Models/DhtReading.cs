@@ -1,13 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 
 namespace Adafruit.Dht.AspireApp.Models
 {
     public class DhtReading
     {
-        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid Id { get; set; } = new Guid();    
         [JsonPropertyName("humidity")]
         public decimal Humidity { get; set; }
         [JsonPropertyName("temperature")]

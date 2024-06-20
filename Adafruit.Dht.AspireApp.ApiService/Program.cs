@@ -2,7 +2,6 @@ using Adafruit.Dht.AspireApp.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Concurrent;
 using System.Text.Json;
-using Microsoft.EntityFrameworkCore;
 
 internal class Program
 {
@@ -32,48 +31,10 @@ internal class Program
 
         app.MapGet("/sensor/readings", async (DhtReadingContext context) =>
         {
-            //try
-            //{
-            //    if (!context.Database.CanConnect())
-            //    {
-            //        context.Database.EnsureCreated();
-            //    }
-            //    context.SaveChanges();
-            //}
-            //catch (Exception ex)
-            //{
-
-            //    Console.WriteLine(ex.Message);
-            //}
-            
-
-      
-            
-            
-            return SensorReadings;
+            var entries = await context.SensorReadings.ToListAsync();
+            return entries;
         });
 
-        app.MapGet("/test", async (DhtReadingContext context) =>
-        {
-            try
-            {
-                //ADD ALL READINGS
-                context.Database.EnsureCreated();
-                await context.SensorReadings.AddAsync(new DhtReading() { Humidity = 60, Temperature = 21, CreatedLocal = DateTime.UtcNow });
-                await context.SaveChangesAsync();
-
-                //ar entries = await context.SensorReadings.ToListAsync();
-
-                //Console.WriteLine($"number of entries in DB={entries.Count}");
-            }
-            catch (Exception ex)
-            {
-
-                Console.WriteLine(ex.Message);
-            }
-
-
-        });
 
 
         app.MapPost("/sensor/readings", async (HttpRequest request, DhtReadingContext context) =>
@@ -82,24 +43,26 @@ internal class Program
             var body = await reader.ReadToEndAsync();
             var readings = JsonSerializer.Deserialize<List<DhtReading>>(body);
 
-            //if (readings != null)
-            //{
-            //    try
-            //    {
-            //       //ADD ALL READINGS
-            //        await context.SensorReadings.AddAsync(readings.First());
-            //        await context.SaveChangesAsync();
+            if (readings != null)
+            {
+                try
+                {
+                    context.Database.EnsureCreated();
+                    var readingToEnter = readings.First();
+                    //readings.ForEach(r => r.Id = Guid.NewGuid());
+                    await context.SensorReadings.AddRangeAsync(readings);
+                    await context.SaveChangesAsync();
 
-            //        var entries = await context.SensorReadings.ToListAsync();
+                    var entries = await context.SensorReadings.ToListAsync();
 
-            //        Console.WriteLine($"number of entries in DB={entries.Count}");
-            //    }
-            //    catch (Exception ex)
-            //    {
+                    Console.WriteLine($"number of entries in DB={entries.Count}");
+                }
+                catch (Exception ex)
+                {
 
-            //        Console.WriteLine(  ex.Message);
-            //    }
-            //}
+                    Console.WriteLine(ex.Message);
+                }
+            }
             return Results.Ok();
         });
 

@@ -53,8 +53,17 @@ public class Worker : BackgroundService
         }
         else
         {
-            await ((ApiServiceHttpClient)state).PostSensorReadingsAsync(readings);
-            readings.Clear();
+            try
+            {
+                await ((ApiServiceHttpClient)state).PostSensorReadingsAsync(readings);
+                readings.Clear();
+            }
+            catch (Exception ex)
+            {
+
+                _logger.LogError(ex.Message, ex);
+            }
+            
         }
     }
 }
